@@ -47,13 +47,10 @@ void GcodeSuite::G42() {
 
     // Move to current_position, as modified by I, J, P parameters
     destination = current_position;
-		if(auto_manu_level_sel){
-	    if (hasI) destination.x = _ABL_GET_MESH_X(ix);
-	    if (hasJ) destination.y = _ABL_GET_MESH_Y(iy);
-		}else{
-			if (hasI) destination.x = _MBL_GET_MESH_X(ix);
-	    if (hasJ) destination.y = _MBL_GET_MESH_Y(iy);
-		}
+
+    if (hasI) destination.x = bedlevel.get_mesh_x(ix);
+    if (hasJ) destination.y = bedlevel.get_mesh_y(iy);
+
     #if HAS_PROBE_XY_OFFSET
       if (parser.boolval('P')) {
         if (hasI) destination.x -= probe.offset_xy.x;

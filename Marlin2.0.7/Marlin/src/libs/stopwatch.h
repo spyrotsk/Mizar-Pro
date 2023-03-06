@@ -21,13 +21,10 @@
  */
 #pragma once
 
+#include "../inc/MarlinConfig.h"
+
 // Print debug messages with M111 S2 (Uses 156 bytes of PROGMEM)
 //#define DEBUG_STOPWATCH
-
-#include "../core/macros.h" // for FORCE_INLINE
-
-#include <stdint.h>
-typedef uint32_t millis_t;
 
 /**
  * @brief Stopwatch class
@@ -36,7 +33,7 @@ typedef uint32_t millis_t;
  */
 class Stopwatch {
   private:
-    enum State : char { _STOPPED, _RUNNING, _PAUSED };
+    enum State : char { STOPPED, RUNNING, PAUSED };
 
     static Stopwatch::State state;
     static millis_t accumulator;
@@ -56,6 +53,7 @@ class Stopwatch {
      * @return true on success
      */
     static bool stop();
+    static bool abort() { return stop(); } // Alias by default
 
     /**
      * @brief Pause the stopwatch
@@ -90,14 +88,14 @@ class Stopwatch {
      * @details Return true if the timer is currently running, false otherwise.
      * @return true if stopwatch is running
      */
-    FORCE_INLINE static bool isRunning() { return state == _RUNNING; }
+    FORCE_INLINE static bool isRunning() { return state == RUNNING; }
 
     /**
      * @brief Check if the timer is paused
      * @details Return true if the timer is currently paused, false otherwise.
      * @return true if stopwatch is paused
      */
-    FORCE_INLINE static bool isPaused() { return state == _PAUSED; }
+    FORCE_INLINE static bool isPaused() { return state == PAUSED; }
 
     /**
      * @brief Get the running time
@@ -112,11 +110,11 @@ class Stopwatch {
        * @brief Print a debug message
        * @details Print a simple debug message "Stopwatch::function"
        */
-      static void debug(const char func[]);
+      static void debug(FSTR_P const);
 
     #else
 
-      static inline void debug(const char[]) {}
+      static void debug(FSTR_P const) {}
 
     #endif
 };

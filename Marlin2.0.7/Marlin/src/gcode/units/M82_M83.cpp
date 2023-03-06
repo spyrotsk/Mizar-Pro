@@ -20,23 +20,20 @@
  *
  */
 
+#include "../../inc/MarlinConfigPre.h"
+
+#if HAS_EXTRUDERS
+
 #include "../gcode.h"
-#include "../../lcd/extui/lib/mks_ui/draw_ui.h"
 
 /**
  * M82: Set E codes absolute (default)
  */
-void GcodeSuite::M82() 
-{ 
-	set_e_absolute(); 
-	uiCfg.e_relative = 0;
-}
+void GcodeSuite::M82() { set_e_absolute(); }
 
 /**
  * M83: Set E codes relative while in Absolute Coordinates (G90) mode
  */
-void GcodeSuite::M83() 
-{ 
-	set_e_relative(); 
-	uiCfg.e_relative = 1;
-}
+void GcodeSuite::M83() { set_e_relative(); }
+
+#endif // HAS_EXTRUDERS

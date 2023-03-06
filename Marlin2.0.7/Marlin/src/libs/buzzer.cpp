@@ -22,17 +22,17 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if USE_BEEPER
+#if HAS_BEEPER
 
 #include "buzzer.h"
 #include "../module/temperature.h"
+#include "../lcd/marlinui.h"
 
 #if ENABLED(EXTENSIBLE_UI)
-#include "../lcd/extui/ui_api.h"
+  #include "../lcd/extui/ui_api.h"
 #endif
 
 Buzzer::state_t Buzzer::state;
-bool Buzzer::onoff = 0;
 CircularQueue<tone_t, TONE_QUEUE_LENGTH> Buzzer::buffer;
 Buzzer buzzer;
 
@@ -44,41 +44,41 @@ Buzzer buzzer;
  * @param duration Duration of the tone in milliseconds
  * @param frequency Frequency of the tone in hertz
  */
-void Buzzer::tone(const uint16_t duration, const uint16_t frequency/*=0*/)
-{
-    while(buffer.isFull()) {
-        tick();
-        thermalManager.manage_heater();
+void Buzzer::tone(const uint16_t duration, const uint16_t frequency/*=0*/) {
+  if (!ui.sound_on) return;
+  while (buffer.isFull()) {
+    tick();
+    thermalManager.task();
+  }
+  tone_t tone = { duration, frequency };
+  buffer.enqueue(tone);
+}
+
+void Buzzer::tick() {
+  if (!ui.sound_on) return;
+  const millis_t now = millis();
+
+  if (!state.endtime) {
+    if (buffer.isEmpty()) return;
+
+    state.tone = buffer.dequeue();
+    state.endtime = now + state.tone.duration;
+
+    if (state.tone.frequency > 0) {
+      #if ENABLED(EXTENSIBLE_UI) && DISABLED(EXTUI_LOCAL_BEEPER)
+        CRITICAL_SECTION_START();
+        ExtUI::onPlayTone(state.tone.frequency, state.tone.duration);
+        CRITICAL_SECTION_END();
+      #elif ENABLED(SPEAKER)
+        CRITICAL_SECTION_START();
+        ::tone(BEEPER_PIN, state.tone.frequency, state.tone.duration);
+        CRITICAL_SECTION_END();
+      #else
+        on();
+      #endif
     }
-    tone_t tone = { duration, frequency };
-    buffer.enqueue(tone);
+  }
+  else if (ELAPSED(now, state.endtime)) reset();
 }
 
-void Buzzer::tick()
-{
-    const millis_t now = millis();
-
-    if(!state.endtime) {
-        if(buffer.isEmpty()) return;
-
-        state.tone = buffer.dequeue();
-        state.endtime = now + state.tone.duration;
-
-        if(state.tone.frequency > 0) {
-#if ENABLED(EXTENSIBLE_UI)
-            CRITICAL_SECTION_START();
-            ExtUI::onPlayTone(state.tone.frequency, state.tone.duration);
-            CRITICAL_SECTION_END();
-#endif
-#if ENABLED(SPEAKER) && (DISABLED(EXTENSIBLE_UI) || ENABLED(EXTUI_LOCAL_BEEPER))
-            CRITICAL_SECTION_START();
-            ::tone(BEEPER_PIN, state.tone.frequency, state.tone.duration);
-            CRITICAL_SECTION_END();
-#else
-            on();
-#endif
-        }
-    } else if(ELAPSED(now, state.endtime)) reset();
-}
-
-#endif // USE_BEEPER
+#endif // HAS_BEEPER
