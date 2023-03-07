@@ -323,6 +323,10 @@
 #define BOARD_GTM32_MINI              5006  // STM32F103VE controller
 #define BOARD_GTM32_MINI_A30          5007  // STM32F103VE controller
 #define BOARD_GTM32_REV_B             5008  // STM32F103VE controller
+#define BOARD_GTM32_LCD35_A10         4038  // STM32F103VET6 controller 
+#define BOARD_GTM32_LCD35_A10         4038  // STM32F103VET6 controller 
+#define BOARD_GTM32_LCD35_A30         4040  // STM32F103VET6 controller
+#define BOARD_GTM32_LCD35_E180		  4039	// STM32F103VET6 controller
 #define BOARD_MORPHEUS                5009  // STM32F103C8 / STM32F103CB  Libmaple-based STM32F1 controller
 #define BOARD_CHITU3D                 5010  // Chitu3D (STM32F103RE)
 #define BOARD_MKS_ROBIN               5011  // MKS Robin (STM32F103ZE)
